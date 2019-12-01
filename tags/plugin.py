@@ -124,8 +124,12 @@ def get_metadata(name, path):
 
     filename = Path(path) / Path(name)
     with filename.open() as f:
+        meta = []
         metadata = extract_yaml(f)
         if metadata:
-            meta = yaml.load(metadata, Loader=yaml.FullLoader)
-            meta.update(filename=name)
+            try:
+                meta = yaml.load(metadata, Loader=yaml.FullLoader)
+                meta.update(filename=name)
+            except:
+                pass
             return meta
