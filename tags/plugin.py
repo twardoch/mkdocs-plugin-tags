@@ -9,12 +9,24 @@ from pathlib import Path
 import os
 import yaml
 import jinja2
+from jinja2.ext import Extension
 from mkdocs.structure.files import File
 from mkdocs.structure.nav import Section
 from mkdocs.plugins import BasePlugin
 from mkdocs.config.config_options import Type
 from mkdocs.utils import string_types
+try:
+    from pymdownx.slugs import uslugify_cased_encoded as slugify
+except ImportError:
+    from markdown.extensions.toc import slugify
 
+def slugify_this(text):
+    return slugify(text, '-')
+
+class SlugifyExtension(Extension):
+    def __init__(self, environment):
+        super(SlugifyExtension, self).__init__(environment)
+        environment.filters['slugify'] = slugify_this
 
 class TagsPlugin(BasePlugin):
     """
@@ -76,16 +88,30 @@ class TagsPlugin(BasePlugin):
         if self.tags_template is None:
             templ_path = Path(__file__).parent  / Path("templates")
             environment = jinja2.Environment(
-                loader=jinja2.FileSystemLoader(str(templ_path))
+                loader=jinja2.FileSystemLoader(str(templ_path)),
+                extensions=[SlugifyExtension]
                 )
             templ = environment.get_template("tags.md.template")
         else:
             environment = jinja2.Environment(
-                loader=jinja2.FileSystemLoader(searchpath=str(self.tags_template.parent))
+                loader=jinja2.FileSystemLoader(searchpath=str(self.tags_template.parent)),
+                extensions=[SlugifyExtension]
             )
             templ = environment.get_template(str(self.tags_template.name))
+        stags = sorted(data.items(), key=lambda t: t[0].lower())
+        dtags = {}
+        for stag in stags:
+            try:
+                tagletter = stag[0][0].upper()
+                if tagletter not in dtags:
+                    dtags[tagletter] = [stag]
+                else:
+                    dtags[tagletter].append(stag)
+            except:
+                pass
+        ldtags = sorted(dtags.items())
         output_text = templ.render(
-                tags=sorted(data.items(), key=lambda t: t[0].lower()),
+                tags=ldtags,
         )
         return output_text
 
@@ -97,7 +123,8 @@ class TagsPlugin(BasePlugin):
                 continue
             if "title" not in e:
                 e["title"] = "Untitled"
-            for tag in e.get("tags", []):
+            tags = e.get("topic-tags", e.get("topic-auto", e.get("tags", [])))
+            for tag in tags:
                 tag_dict[tag].append(e)
 
         t = self.generate_tags_page(tag_dict)
