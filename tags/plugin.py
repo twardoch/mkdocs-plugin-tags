@@ -122,8 +122,11 @@ class TagsPlugin(BasePlugin):
         return output_text
 
     def generate_tags_file(self):
-        sorted_meta = sorted(
-            self.metadata, key=lambda e: e.get("year", 5000) if e else 0)
+        if self.metadata:
+            sorted_meta = sorted(
+                self.metadata, key=lambda e: e.get("year", 5000) if e else 0)
+        else:
+            sorted_meta = {}
         tag_dict = defaultdict(list)
         for e in sorted_meta:
             if not e:
