@@ -14,7 +14,6 @@ from mkdocs.structure.files import File
 from mkdocs.structure.nav import Section
 from mkdocs.plugins import BasePlugin
 from mkdocs.config.config_options import Type
-from mkdocs.utils import string_types
 try:
     from pymdownx.slugs import uslugify_cased_encoded as slugify
 except ImportError:
@@ -40,9 +39,9 @@ class TagsPlugin(BasePlugin):
     """
 
     config_scheme = (
-        ('tags_filename', Type(string_types, default='tags.md')),
-        ('tags_folder', Type(string_types, default='aux')),
-        ('tags_template', Type(string_types)),
+        ('tags_filename', Type(str, default='tags.md')),
+        ('tags_folder', Type(str, default='aux')),
+        ('tags_template', Type(str)),
     )
 
     def __init__(self):
