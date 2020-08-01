@@ -4,7 +4,7 @@
 # JL Diaz (c) 2019
 # MIT License
 # --------------------------------------------
-from collections  import defaultdict
+from collections import defaultdict
 from pathlib import Path
 import os
 import yaml
@@ -20,13 +20,16 @@ try:
 except ImportError:
     from markdown.extensions.toc import slugify
 
+
 def slugify_this(text):
     return slugify(text, '-')
+
 
 class SlugifyExtension(Extension):
     def __init__(self, environment):
         super(SlugifyExtension, self).__init__(environment)
         environment.filters['slugify'] = slugify_this
+
 
 class TagsPlugin(BasePlugin):
     """
@@ -54,11 +57,14 @@ class TagsPlugin(BasePlugin):
 
     def on_config(self, config):
         # Re assign the options
-        self.tags_filename = Path(self.config.get("tags_filename") or self.tags_filename)
-        self.tags_folder = Path(self.config.get("tags_folder") or self.tags_folder)
+        self.tags_filename = Path(self.config.get(
+            "tags_filename") or self.tags_filename)
+        self.tags_folder = Path(self.config.get(
+            "tags_folder") or self.tags_folder)
         # Make sure that the tags folder is absolute, and exists
         if not self.tags_folder.is_absolute():
-            self.tags_folder = Path(config["docs_dir"]) / ".." / self.tags_folder
+            self.tags_folder = Path(
+                config["docs_dir"]) / ".." / self.tags_folder
         if not self.tags_folder.exists():
             self.tags_folder.mkdir(parents=True)
 
@@ -86,15 +92,16 @@ class TagsPlugin(BasePlugin):
 
     def generate_tags_page(self, data):
         if self.tags_template is None:
-            templ_path = Path(__file__).parent  / Path("templates")
+            templ_path = Path(__file__).parent / Path("templates")
             environment = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(str(templ_path)),
                 extensions=[SlugifyExtension]
-                )
+            )
             templ = environment.get_template("tags.md.template")
         else:
             environment = jinja2.Environment(
-                loader=jinja2.FileSystemLoader(searchpath=str(self.tags_template.parent)),
+                loader=jinja2.FileSystemLoader(
+                    searchpath=str(self.tags_template.parent)),
                 extensions=[SlugifyExtension]
             )
             templ = environment.get_template(str(self.tags_template.name))
@@ -111,12 +118,13 @@ class TagsPlugin(BasePlugin):
                 pass
         ldtags = sorted(dtags.items())
         output_text = templ.render(
-                tags=ldtags,
+            tags=ldtags,
         )
         return output_text
 
     def generate_tags_file(self):
-        sorted_meta = sorted(self.metadata, key=lambda e: e.get("year", 5000) if e else 0)
+        sorted_meta = sorted(
+            self.metadata, key=lambda e: e.get("year", 5000) if e else 0)
         tag_dict = defaultdict(list)
         for e in sorted_meta:
             if not e:
@@ -124,8 +132,9 @@ class TagsPlugin(BasePlugin):
             if "title" not in e:
                 e["title"] = "Untitled"
             tags = e.get("topic-tags", e.get("topic-auto", e.get("tags", [])))
-            for tag in tags:
-                tag_dict[tag].append(e)
+            if tags is not None:
+                for tag in tags:
+                    tag_dict[tag].append(e)
 
         t = self.generate_tags_page(tag_dict)
 
@@ -134,6 +143,7 @@ class TagsPlugin(BasePlugin):
 
 # Helper functions
 
+
 def get_metadata(name, path):
     # Extract metadata from the yaml at the beginning of the file
     def extract_yaml(f):
@@ -141,11 +151,11 @@ def get_metadata(name, path):
         c = 0
         for line in f:
             if line.strip() == "---":
-                c +=1
+                c += 1
                 continue
-            if c==2:
+            if c == 2:
                 break
-            if c==1:
+            if c == 1:
                 result.append(line)
         return "".join(result)
 
