@@ -1,0 +1,154 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tags-macros-plugin"
+dynamic = ["version"]
+description = "Processes tags in yaml metadata for MkDocs"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["mkdocs", "python", "markdown", "tags"]
+authors = [
+  { name = "JL Diaz", email = "jldiaz@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta", # Updated from Alpha
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "mkdocs>=1.0", # Loosened from mkdocs>=0.17
+  "jinja2",
+  "PyYAML>=5.1", # Added PyYAML as it's used in plugin.py
+]
+
+[project.urls]
+Homepage = "https://github.com/jldiaz/mkdocs-plugin-tags" # Assuming this is the project URL
+
+[project.entry-points."mkdocs.plugins"]
+tags = "tags.plugin:TagsPlugin"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.sdist]
+include = ["/tags", "/README.md", "/LICENSE.md"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tags"]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest>=6.0",
+  "pytest-cov>=3.0",
+  "mkdocs-material",
+  "ruff>=0.1.0",
+  "mypy>=1.0",
+  "types-PyYAML",
+  "types-Markdown",
+]
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs-material",
+]
+
+[tool.hatch.envs.docs.scripts]
+serve = "mkdocs serve --dev-addr localhost:8008"
+build = "mkdocs build --clean --strict"
+deploy = "mkdocs gh-deploy --force"
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+    "B",  # flake8-bugbear
+    "A",  # flake8-builtins
+    "C4", # flake8-comprehensions
+    "SIM",# flake8-simplify
+    "PTH",# flake8-use-pathlib
+    "RUF", # Ruff-specific rules
+]
+ignore = ["B905"] # `zip()` without `strict=`. hatch-vcs uses it.
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true # Start with this, can be removed later
+# show_error_codes = true
+# exclude = ["docs/", "site/"] # If you have these folders
+
+# Per-module settings can be useful
+# [[tool.mypy.overrides]]
+# module = "somelibrary.*"
+# ignore_missing_imports = true
+
+[tool.hatch.envs.test] # Specific test environment
+dependencies = [
+  "pytest>=6.0",
+  "pytest-cov>=3.0",
+  "mkdocs-material", # If tests need to build a small mkdocs site
+]
+[tool.hatch.envs.test.scripts]
+cov = "pytest --cov=tags --cov-report=xml --cov-report=html"
+run = "pytest {args}"
+
+[tool.hatch.scripts]
+# General checks
+check = [
+    "lint:check",
+    "format:check",
+    "typecheck",
+    "test:run", # Updated
+]
+fix = ["lint:fix", "format:fix"]
+
+# Linting - these can run in the default or a dedicated lint env
+"lint:check" = "hatch run default:ruff check ."
+"lint:fix" = "hatch run default:ruff check . --fix"
+
+# Formatting
+"format:check" = "hatch run default:ruff format --check ."
+"format:fix" = "hatch run default:ruff format ."
+
+# Type checking
+typecheck = "hatch run default:mypy tags/ setup.py"
+
+# Testing - use the 'test' environment
+"test:run" = "hatch run test:run"
+"test:cov" = "hatch run test:cov"
+
+# Building
+build = "hatch build"
+
+# Publishing (example, adjust as needed)
+# publish = "hatch publish"
+# "publish:test" = "hatch publish -r testpypi"
+
+# Default environment for scripts
+# [tool.hatch.envs.default.scripts]
+# check = "hatch run check" # Example: run 'check' script in default env

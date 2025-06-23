@@ -4,17 +4,47 @@ Support for tags in the yaml-metadata in the header of markdown files.
 
 Extracts this metadata and creates a "Tags" page which lists all tags and all pages for each tag.
 
-## Quick Demo
+## Installation
 
-Install this plugin (it will also install mkdocs if required)
+It's recommended to use a virtual environment for Python projects. You can create one using `venv` or, for a faster experience, `uv`.
 
+**Using `uv` (recommended):**
 ```shell
-$ pip install git+https://github.com/jldiaz/mkdocs-plugin-tags.git
+# Install uv (if you haven't already)
+# See https://github.com/astral-sh/uv for installation instructions
+# e.g., pip install uv
+
+# Create a virtual environment and activate it
+uv venv
+source .venv/bin/activate # On Linux/macOS
+# .venv\Scripts\activate # On Windows
 ```
 
-> **Note**. Since this package is in alpha stage, it is not yet available from pypi, so the only way to install it is via git.
+**Using `venv`:**
+```shell
+python -m venv .venv
+source .venv/bin/activate # On Linux/macOS
+# .venv\Scripts\activate # On Windows
+```
 
-Create a new documentation folder:
+Once your virtual environment is activated, install the plugin:
+
+From PyPI (once published):
+```shell
+pip install tags-macros-plugin
+```
+Or, for the latest development version from GitHub:
+```shell
+pip install git+https://github.com/jldiaz/mkdocs-plugin-tags.git
+```
+Alternatively, if you have cloned the repository locally:
+```shell
+pip install .
+```
+
+## Quick Demo
+
+After installing the plugin, you can create a new documentation folder:
 
 ```shell
 $ mkdocs new demo
