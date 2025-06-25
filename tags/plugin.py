@@ -20,12 +20,12 @@ except ImportError:
     from markdown.extensions.toc import slugify
 
 
-def slugify_this(text: str) -> str:
-    return slugify(text, "-")  # type: ignore[no-any-return]
+def slugify_this(text):
+    return slugify(text, "-")
 
 
 class SlugifyExtension(Extension):
-    def __init__(self, environment: jinja2.Environment) -> None:
+    def __init__(self, environment):
         super().__init__(environment)
         environment.filters["slugify"] = slugify_this
 
@@ -59,11 +59,9 @@ class TagsPlugin(BasePlugin):
     def on_config(self, config: Any) -> None:  # TODO: Add specific mkdocs types
         # Re assign the options
         self.tags_filename = Path(
-            self.config.get("tags_filename") or str(self.tags_filename)
+            self.config.get("tags_filename") or self.tags_filename
         )
-        self.tags_folder = Path(
-            self.config.get("tags_folder") or str(self.tags_folder)
-        )
+        self.tags_folder = Path(self.config.get("tags_folder") or self.tags_folder)
         # Make sure that the tags folder is absolute, and exists
         if not self.tags_folder.is_absolute():
             self.tags_folder = Path(config["docs_dir"]) / ".." / self.tags_folder
@@ -135,7 +133,7 @@ class TagsPlugin(BasePlugin):
             # Filter out None values from self.metadata before sorting
             valid_metadata = [m for m in self.metadata if m is not None]
             sorted_meta = sorted(
-                valid_metadata, key=lambda e: e.get("year", 5000)
+                self.metadata, key=lambda e: e.get("year", 5000) if e else 0
             )
         else:
             sorted_meta = [] # Should be an empty list if metadata is empty
@@ -160,8 +158,6 @@ class TagsPlugin(BasePlugin):
         with (self.tags_folder / self.tags_filename).open("w", encoding="utf-8") as f:
             f.write(t)
 
-
-from typing import Any, Optional, Union, DefaultDict, List, Dict, Tuple # Added for type hints
 
 # Helper functions
 

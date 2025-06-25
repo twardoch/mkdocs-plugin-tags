@@ -4,7 +4,9 @@
 # JL Diaz (c) 2019
 # --------------------------------------------
 
-from pathlib import Path
+import os
+
+from setuptools import find_packages, setup
 
 from setuptools import find_packages, setup
 
